@@ -138,13 +138,13 @@
 						}						
 					}
 				}
-				
-				if ( appsec != 0 ) {
+								
+				if ( appsec != 0 && CxPT.topnav.codebashing_enabled == 0 ) {
 					if ( appsec.nextSibling.nodeType == 3 ) cb.removeChild( appsec.nextSibling );
 					if ( appsec.nextSibling.nodeType == 1 && appsec.nextSibling.className == "right-menu-seperator" ) cb.removeChild( appsec.nextSibling );
 					cb.removeChild( appsec );
 				}
-				if ( support != 0 ) {
+				if ( support != 0 && CxPT.topnav.support_enabled == 0 ) {
 					if ( support.nextSibling.nodeType == 3 ) cb.removeChild( support.nextSibling );
 					if ( support.nextSibling.nodeType == 1 && support.nextSibling.className == "right-menu-seperator" ) cb.removeChild( support.nextSibling );
 					cb.removeChild( support );
@@ -372,7 +372,7 @@ CxPT.Init = function () {
 		topnav_present = 0;
 	} else if ( window.location.pathname.includes( "/Projects.aspx" ) ) {
 		if ( CxPT.schedule.enabled == 1 ) CxPT.schedule.Init();
-	} 
+	}
 
 	if ( topnav_present ) {
 		if ( CxPT.banners.topnav_banners.length > 0 ) CxPT.banners.topnav_Init();
