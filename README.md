@@ -3,6 +3,10 @@
 A set of customizations for the Checkmarx Portal, driven by JavaScript. This collection of tweaks includes:
 1. Tweaks to the login page (removing the "Forgot Password" link, adding custom buttons)
 2. Adding custom Banners / notifications for informing users of events, outages, or services (Onboarding/optimization)
+3. Changing the size of tables in the UI (Projets, ProjectState, Scans, and Queue pages)
+4. Disabling the Queue Refresh
+5. Removing buttons from the top-right area (Support & Documentation, Codebashing)
+6. Adding custom buttons to the top-right area
 
 ## Automated Deployment
 
@@ -34,18 +38,7 @@ Various features in CxP-Tweaks.js require the script to be loaded within the Che
 Add the above script tag to the following files:
 1. Checkmarx\Checkmarx Access Control\wwwroot\index.html
   - Required to enable the login page tweaks (removing Forgot Password, adding custom cuttons)
+  - insert the script before the </body> tag at the end of the file
 2. Checkmarx\CheckmarxWebPortal\Web\UIComponents\UserControls\PortalMenu\PortalMenu.ascx
-  - Required to enable the following tweaks:
-  1. Changing the "Documentation & Services" link in the top-nav
-  2. Hiding the "Codebashing" link in the top-nav
-  3. Showing Banners within the Checkmarx Portal
-  4. Individual page customizations on the Projects, ProjectState, AllScans, and Queue pages.
-  5. Scheduler default time change.
-3. Checkmarx\CheckmarxWebPortal\Web\ViewerMain.aspx
- - Required to enable the following:
-  1. Showing Banners within the Results Viewer page
-  2. Hiding the "Codebashing" link in the Results Viewer page
-4. Checkmarx\CheckmarxWebPortal\Web\??
-
-
-
+  - Required for most of the remaining tweaks
+  - insert the script before the </header> tag at the end of the file
