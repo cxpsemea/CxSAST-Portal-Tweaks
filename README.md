@@ -8,11 +8,17 @@ A set of customizations for the Checkmarx Portal, driven by JavaScript. This col
 5. Removing buttons from the top-right area (Support & Documentation, Codebashing)
 6. Adding custom buttons to the top-right area
 
-## Automated Deployment
+## Configuration
+Edit the "CxP-Tweaks.js" file and customize the configuration options as indicated at the top of the file.
+Ensure that you have updated this file prior to deploying it.
+
+## Automated Installation
 
 Use the install.ps1 powershell script to deploy CxP-Tweaks to a target Checkmarx installation folder.
 
 Initial installation: .\install.ps1
+
+Redeploy after modifying CxP-Tweaks.js: .\install.ps1
 
 Re-installation after a hotfix or upgrade: .\install.ps1 -force $true
 
@@ -33,8 +39,6 @@ The recommended method to deploy this script is:
  - in a High-Availability or Distributed environment, CxP-Tweaks.js must be placed on every server hosting the Checkmarx Web Portal component.
 - edit the CxP-Tweaks.js file to customize the settings for your environment.
 
-## Enablement
-
 Various features in CxP-Tweaks.js require the script to be loaded within the Checkmarx Portal. This requires including the script within the Portal's .aspx and .html files via the following Script tags:
 	<script type="text/javascript" src="/CxWebClient/CxP-Tweaks.js" defer></script>
 
@@ -45,3 +49,4 @@ Add the above script tag to the following files:
 2. Checkmarx\CheckmarxWebPortal\Web\UIComponents\UserControls\PortalMenu\PortalMenu.ascx
   - Required for most of the remaining tweaks
   - insert the script before the </header> tag at the end of the file
+  
