@@ -8,7 +8,12 @@ A set of customizations for the Checkmarx Portal, driven by JavaScript. This col
 5. Removing buttons from the top-right area (Support & Documentation, Codebashing)
 6. Adding custom buttons to the top-right area
 
+# Installation
+
+Clone this git repo somewhere.
+
 ## Configuration
+
 Edit the "CxP-Tweaks.js" file and customize the configuration options as indicated at the top of the file.
 Ensure that you have updated this file prior to deploying it.
 
