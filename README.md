@@ -13,8 +13,11 @@ A set of customizations for the Checkmarx Portal, driven by JavaScript. This col
 Use the install.ps1 powershell script to deploy CxP-Tweaks to a target Checkmarx installation folder.
 
 Initial installation: .\install.ps1
+
 Re-installation after a hotfix or upgrade: .\install.ps1 -force $true
+
 Reset modified files to original: .\install.ps1 -reset $true
+
 Reset & remove CxP-Tweaks: .\install.ps1 -purge $true
 
 Parameter description:
