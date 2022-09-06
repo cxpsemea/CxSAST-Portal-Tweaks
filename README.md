@@ -40,7 +40,8 @@ The recommended method to deploy this script is:
 - edit the CxP-Tweaks.js file to customize the settings for your environment.
 
 Various features in CxP-Tweaks.js require the script to be loaded within the Checkmarx Portal. This requires including the script within the Portal's .aspx and .html files via the following Script tags:
-	<script type="text/javascript" src="/CxWebClient/CxP-Tweaks.js" defer></script>
+
+- <script type="text/javascript" src="/CxWebClient/CxP-Tweaks.js" defer></script>
 
 Add the above script tag to the following files:
 1. Checkmarx\Checkmarx Access Control\wwwroot\index.html
