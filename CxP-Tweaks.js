@@ -313,7 +313,8 @@
 		if ( !div ) return;
 			
 		var UL = document.createElement( "UL" );
-		UL.style.cssText = "position:absolute; background-color: #baabaa; padding: 2px; border: 1px solid black; display: block; min-width:100px; text-align:left; list-style-type:none; margin:2px;"
+		//UL.style.cssText = "position:absolute; background-color: #baabaa; padding: 2px; border: 1px solid black; display: block; min-width:100px; text-align:left; list-style-type:none; margin:2px;"
+		UL.style.className = "dropdown-menu";
 		div.appendChild( UL );
 		CxPT.menu.obj = UL;
 		
@@ -329,6 +330,7 @@
 	CxPT.menu.addItem = function ( entry ) {
 		var LI = document.createElement( "LI" );
 //		LI.style.cssText = "margin: 0px;";
+		LI.style.backgroundColor = "#aeaeae";
 		LI.innerHTML = entry;
 		CxPT.menu.obj.appendChild( LI );
 	}
