@@ -1,5 +1,12 @@
 # Checkmarx Portal Tweaks
 
+This was developed against Checkmarx version 9.5.0 and not tested against previous versions (yet) - it should work with 9.4.
+This modifies the following files:
+1. Checkmarx\Checkmarx Access Control\wwwroot\index.html
+2. Checkmarx\CheckmarxWebPortal\Web\UIComponents\UserControls\PortalMenu\PortalMenu.ascx
+
+Ensure you test in a test environment prior to rolling out to Production. The above files are backed up (with a .bak extension) but consider creating additional additional backups manually also.
+
 A set of customizations for the Checkmarx Portal, driven by JavaScript. This collection of tweaks includes:
 1. Tweaks to the login page (removing the "Forgot Password" link, adding custom buttons)
 2. Adding custom Banners / notifications for informing users of events, outages, or services (Onboarding/optimization)
