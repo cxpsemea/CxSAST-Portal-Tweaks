@@ -24,7 +24,7 @@
 // Banner options
 	CxPT.banners.topnav_enabled = 1;
 	CxPT.banners.resultsviewer_enabled = 1;
-	CxPT.banners.height = "30px";
+	CxPT.banners.height = 30;
 	CxPT.banners.topnav_banners = [
 		"This is an example banner. <a href='https://github.com/michaelkubiaczyk/CxP-Tweaks' style='color: #5f5f5f; text-decoration: underline #333 solid !important; font-size: 1.1em;' target='_blank'>Click here</a>" // example of usage, uncomment and enable to show
 	];
@@ -56,6 +56,7 @@
 		[ "UserQueue.aspx", "<a href='#' onclick='CxPT.menu.updateUserQueueHeight()'>Table Height</a>" ]
 	];
 	
+	
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // end configuration options
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -68,7 +69,6 @@
 
 // Banners
 
-	CxPT.banners.gridgap = 40; // height of the banner on the ViewerGrid page, in pixels.
 
 	CxPT.banners.resultsviewer_Init = function () { // banner on the results viewer page
 		if ( CxPT.banners.resultsviewer_enabled == 1 ) {
