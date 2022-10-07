@@ -9,6 +9,7 @@
 	CxPT.banners = new Object();
 	CxPT.topnav = new Object();
 	CxPT.schedule = new Object();
+	CxPT.querydescription = new Object();
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //	Configuration options
@@ -23,8 +24,9 @@
 // Banner options
 	CxPT.banners.topnav_enabled = 1;
 	CxPT.banners.resultsviewer_enabled = 1;
+	CxPT.banners.height = "30px";
 	CxPT.banners.topnav_banners = [
-		"This is an example banner. <a href='https://github.com/michaelkubiaczyk/CxP-Tweaks' style='color: #5f5f5f; text-decoration: underline #333 solid !important' target='_blank'>Click here</a>" // example of usage, uncomment and enable to show
+		"This is an example banner. <a href='https://github.com/michaelkubiaczyk/CxP-Tweaks' style='color: #5f5f5f; text-decoration: underline #333 solid !important; font-size: 1.1em;' target='_blank'>Click here</a>" // example of usage, uncomment and enable to show
 	];
 	CxPT.banners.resultsviewer_banners = CxPT.banners.topnav_banners; // Show the same banners in all locations by default.
 
@@ -40,6 +42,9 @@
 	CxPT.schedule.startHour = 0; // midnight
 	CxPT.schedule.endHour = 24; // midnight
 	CxPT.schedule.increment = 15; // 15 minute increment
+	
+// ScanQueryDescription page options	
+	CxPT.querydescription.codebashing_enabled = 0;
 	
 // Page-specific user-side tweaks
 	CxPT.menu.page_items = [
@@ -68,7 +73,10 @@
 		if ( CxPT.banners.resultsviewer_enabled == 1 ) {
 			//ID="dottomPane"
 			//ID="mainSplitBar"
-			var div = document.getElementById( "bottomSplitter" );
+			oldcalculateGridHight = calculateGridHight;
+			calculateGridHight = function(data) { return oldcalculateGridHight(data) - CxPT.banners.gridgap; };
+			
+			var div = document.getElementById( "descriptionDiv" );
 			if ( !div ) return;
 			var span = CxPT.banners.createBanner();
 			div.parentNode.insertBefore( span, div );
@@ -89,36 +97,42 @@
 				CxPT.banners.setBannerText( CxPT.banners.topnav_banners );	
 			}
 		}
-	}
+	};
 	CxPT.banners.getGridGap = function() {
 		if ( CxPT.banners.resultsviewer.enabled  == 1 ) {
 			return CxPT.banners.gridgap;
 		}
 		return 0;
-	}
+	};
 
 	CxPT.banners.setBannerText = function(banners) {
 		if ( banners.length == 0 ) return;		
 		var banner = document.getElementById('onboarding_banner');		
 		var msg = Math.floor( Math.random() * banners.length );
 		banner.innerHTML = banners[msg];
-	}
+	};
 
 	CxPT.banners.createBanner = function() {
 		var span = document.createElement( "SPAN" );
-		span.innerHTML = `<div style="background-color: #fff1cc;
+		span.id = "onboarding_banner_box";
+		span.style.cssText = `background-color: #fff1cc;
 					box-shadow: 0 3px 3px 0 rgba(0,0,0,.2);
 					border-radius: 0;
 					color: #5f5f5f;
-					margin: 0;
+					margin: auto;
 					padding: .3rem 2.9rem;
-					line-height: 1.9rem;
+					line-height: ` + CxPT.banners.height + `;
+					height: ` + CxPT.banners.height + `;
 					clear: both;
 					text-align: center;
-					font-weight: normal">
-		<span id='onboarding_banner'></span></div>`;
+					font-weight: normal;
+					text-align: center;
+					display:block;
+					font-size: 1.1em !important;`;
+					
+		span.innerHTML = `<span id='onboarding_banner'></span></div>`;
 		return span;
-	}
+	};
 
 // Top Nav
 
@@ -202,7 +216,7 @@
 
 	CxPT.loginpage.addButton = function ( div, URL, text ) {
 		div.innerHTML += "<div style='position: relative; top: 50px; left: 0px; right: 0px; bottom: 0px; height: 68px; overflow: none; margin-right: -17px; margin-bottom: -17px;'><a href='" + URL + "' class='cx-transparent__1fGE3' style='color: rgb(83, 200, 0); border-color: rgb(83, 200, 0); height: 40px; width: 325px; text-transform: initial; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; padding-top: 5px; padding-left:0px; padding-right:0px;'>" + text + "</a></div>";
-	}
+	};
 
 	CxPT.loginpage.polling_counter = 0;
 
@@ -228,7 +242,7 @@
 				//CxPT.loginpage.addButton( div, "https://lmgtfy.app/?q=how+to+use+checkmarx", "Help" );
 			}
 		}
-	}
+	};
 	
 // Scheduler
 	CxPT.schedule.Init = function() {
@@ -251,7 +265,7 @@
 			datepicker.set_displayValue( CxPT.schedule.getRandomScheduledTime(true) );
 		}
 		
-	}
+	};
 	
 	CxPT.schedule.getRandomScheduledTime = function ( b24 ) {
 		var slots = (CxPT.schedule.endHour - CxPT.schedule.startHour) * 60 / CxPT.schedule.increment;
@@ -289,7 +303,7 @@
 				if ( hour < 10 ) hour = "0" + hour;
 			return "'" + hour + ":" + min + suffix;
 		}
-	}
+	};
 	
 	
 
@@ -306,7 +320,7 @@
 			else	
 				CxPT.menu.obj.style.display = "block";
 		}
-	}
+	};
 	
 	CxPT.menu.Init = function () {
 		var div = document.getElementById( 'CxPTMenuButton' );
@@ -325,7 +339,7 @@
 				}
 			}
 		}
-	}
+	};
 
 	CxPT.menu.addItem = function ( entry ) {
 		var LI = document.createElement( "LI" );
@@ -333,7 +347,7 @@
 		LI.style.backgroundColor = "#aeaeae";
 		LI.innerHTML = entry;
 		CxPT.menu.obj.appendChild( LI );
-	}
+	};
 
 
 	CxPT.menu.updateUserQueueHeight = function () {
@@ -348,7 +362,7 @@
 				setTimeout( CxPT.menu.queueRefreshReset, 100 );
 			};
 		}
-	}
+	};
 	
 	CxPT.menu.queueRefreshReset = function () {
 		var grid = document.getElementById("ctl00_cpmain_QueueGrid_GridData");
@@ -357,8 +371,15 @@
 		if ( typeof grid.originalUserQueueRebind == 'undefined' ) {
 			CxPT.menu.updateUserQueueHeight();
 		}		
-	}
+	};
 		
+// ScanQueryDescription page removal of Codebashing
+	CxPT.querydescription.Init = function () {
+		var codebashing_tab = document.getElementById('divAppSecCoachTabs');
+		if ( !codebashing_tab ) return;
+		codebashing_tab.style.display = "none";
+	};
+
 
 CxPT.Init = function () {
 	console.debug( "Initializing Checkmarx Portal Tweaks" );
@@ -369,11 +390,14 @@ CxPT.Init = function () {
 	if ( window.location.pathname.includes( "/auth/" ) ) {
 		if ( CxPT.loginpage.forgotpassword_enabled == 0 || CxPT.loginpage.custom_buttons.length > 0 ) CxPT.loginpage.polling_function();
 		topnav_present = 0;
-	} else if ( window.location.pathname.includes( "/ViewerMain" ) ) {
+	} else if ( window.location.pathname.includes( "/ViewerGrid.aspx" ) ) {
 		if ( CxPT.banners.resultsviewer_banners.length > 0 ) CxPT.banners.resultsviewer_Init();
 		topnav_present = 0;
 	} else if ( window.location.pathname.includes( "/Projects.aspx" ) ) {
 		if ( CxPT.schedule.enabled == 1 ) CxPT.schedule.Init();
+	} else if ( window.location.pathname.includes( "/ScanQueryDescription.aspx" ) ) {
+		if ( CxPT.querydescription.codebashing_enabled == 0 ) CxPT.querydescription.Init();
+		topnav_present = 0;
 	}
 
 	if ( topnav_present ) {
@@ -383,7 +407,7 @@ CxPT.Init = function () {
 		// if ( CxPT.schedule.enabled == 1 ) CxPT.schedule.Init(); // in progress work to add this to New Projects also.
 	}
 
-}
+};
 
 CxPT.Init();
 

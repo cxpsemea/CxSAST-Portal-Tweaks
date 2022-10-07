@@ -1,17 +1,17 @@
 param (
 	[string]$installationPath,
-	[boolean]$reset=$False,
+	[boolean]$restore=$False,
 	[boolean]$purge=$False,
 	[boolean]$force=$False
 )
 
-$files = @( 'Checkmarx Access Control\wwwroot\index.html', 'CheckmarxWebPortal\Web\UIComponents\UserControls\PortalMenu\PortalMenu.ascx' );
+$files = @( 'Checkmarx Access Control\wwwroot\index.html', 'CheckmarxWebPortal\Web\UIComponents\UserControls\PortalMenu\PortalMenu.ascx', 'CheckmarxWebPortal\Web\ScanQueryDescription.aspx', 'CheckmarxWebPortal\Web\ViewerGrid.aspx' );
 
 Write-Host "Parameters:"
 Write-Host "-installationPath [C:\Program Files\Checkmarx]`n`tPath to installation"
-Write-Host "-reset `$True `n`tReset files to original backups"
-Write-Host "-purge `$True `n`tReset files to originals, remove backups, and remove CxP-Tweaks.js file"
-Write-Host "-force `$True `n`tForce creating a new backup file (after platform upgrade)`n"
+Write-Host "-restore `$True `n`tRestore files from original backups"
+Write-Host "-purge `$True `n`tRestore files from original backups, remove backups and staging files, and remove CxP-Tweaks.js file"
+Write-Host "-force `$True `n`tForce creating a new backup file (during installation) or restoring from backup (during restore/purge)`n"
 
 function find_in_file {
 	param ( $file, $string )
@@ -25,61 +25,112 @@ function find_in_file {
 }
 
 function do_backup {
+    Write-Host "`nBacking up existing files"
+
 	foreach ( $file in $files ) {
-		$orig = "$installationPath\$file"
-		$backup = "$orig.cxpt.bak"
-		
-		if ( (Test-Path -Path $backup) -And $force -ne $True ) {
-			Write-Host "Backup $backup already exists, not forced through -force parameter."
-		} else {
-			if ( find_in_file -file $orig -string "CxWebClient/CxP-Tweaks.js" ) {
-				Write-Host "File $orig already updated to include 'CxP-Tweaks.js', skipping backup"
-			} else {
-				Write-Host "Creating backup $backup"			
-				Copy-Item $orig -Dest $backup
-			}
-		}
+		$current = "$installationPath\$file"
+		$backup = "$current.cxpt.bak"
+        $stage = "$current.cxpt.stage"
+
+        if ( $force -ne $True ) {
+            if (Test-Path -Path $stage) {
+                if ((Get-FileHash -path $current).Hath -eq (Get-FileHash -path $stage).Hash) {
+                    Write-Host "  Note: The current file ($current) has already been modified and matches the staging file ($stage). Skipping."
+                    continue
+                }
+                if ( find_in_file -file $current -string "CxWebClient/CxP-Tweaks.js" ) {
+                    Write-Host "  Note: The current file ($current) already includes CxP-Tweaks.js, but does not match the staging file ($stage) - it may have been manually modified. Skipping."
+                    continue
+                }
+            }
+
+		    if ( (Test-Path -Path $backup) ) {
+			    Write-Host "  Backup $backup already exists, not forced using parameter -force `$true. Skipping."
+                continue
+		    }
+        }
+
+		Write-Host "  Creating backup $backup"			
+		Copy-Item $current -Dest $backup -Force
 	}
 }
 
-function do_reset {
+function do_restore {
+    Write-Host "`nRestoring from backup"
+    $restore_count = 0
 	foreach ( $file in $files ) {
-		$orig = "$installationPath\$file"
-		$backup = "$orig.cxpt.bak"
-		
-		if ( Test-Path -Path $backup ) {
-			Write-Host "Restoring backup to $orig"
-			Copy-Item $backup -Dest $orig -Force
-		} else {
-			Write-Host "Backup file $backup does not exist to restore."
-		}
+		$current = "$installationPath\$file"
+		$backup = "$current.cxpt.bak"
+        $stage = "$current.cxpt.stage"
+
+        if ( -Not (Test-Path -Path $backup) ) {
+            Write-Host "  Note: Backup file $backup does not exist, some files may have been manually removed. Skipping."
+            continue
+        }	
+        
+        if ( (Get-FileHash -Path $current).Hash -eq (Get-FileHash -Path $backup).Hash ) {
+            Write-Host "  Note: File $current already matches the backup $backup. Skipping."
+            $restore_count++
+            continue
+        }
+        	
+        if ( $force -ne $True ){
+            if ( -Not (Test-Path -Path $stage) ) {
+                Write-Host "  Note: Staging file $stage does not exist, some files may have been manually removed. Skipping."
+                continue
+            }
+
+            if ( -Not ((Get-FileHash -Path $current).Hash -eq (Get-FileHash -Path $stage).Hash) ) {
+                Write-Host "  Error: The current file ($current) does not match the staging file ($stage). `n    This may be due to running a hotfix or update, in which case the backup is from an older version. Skipping the restore.`n    Please review the contents of these files. If you wish to force the restore use the parameter -force `$true."
+                continue
+            }
+        }
+
+		Write-Host "  Restoring $current from backup $backup"
+		Copy-Item $backup -Dest $current -Force		
+        $restore_count++
 	}
+
+    Write-Host "Restored $restore_count out of $($files.Count) files."
+
+    return $restore_count
 }
 
 function do_purge {
+    $ret = do_restore
+    if ( $ret -ne $files.Count -and $force -ne $True ) {
+        Write-Host "`nError: Unable to restore all files from backup, cancelling the purge. To force, use the parameter -force $True"
+        return
+    }
+
+    Write-Host "`nPurging CxP-Tweaks from the system"
 	foreach ( $file in $files ) {
-		$orig = "$installationPath\$file"
-		$backup = "$orig.cxpt.bak"
+		$current = "$installationPath\$file"
+		$backup = "$current.cxpt.bak"
+        $stage = "$current.cxpt.stage"
 		
 		if ( Test-Path -Path $backup ) {
-			Write-Host "Restoring backup to $orig"
-			Copy-Item $backup -Dest $orig -Force
-			Write-Host "Removing backup $backup"
+			Write-Host "  Removing backup $backup"
 			Remove-Item $backup 
 		} else {
-			Write-Host "Backup file $backup does not exist to restore."
+			Write-Host "  Note: Backup file $backup does not exist to remove."
 		}
+
+        if ( Test-Path -Path $stage ) {
+            Write-Host "  Removing staging file $stage"
+            Remove-Item $stage
+        } else {
+            Write-HOst "  Note: Staging file $stage does not exist to remove."
+        }
 	}
 	
 	$CxP_path = "$installationPath\CheckmarxWebPortal\Web\CxP-Tweaks.js"
 	if ( Test-Path -Path $CxP_path ) {
-		Write-Host "Removing $CxP_path"
+		Write-Host "  Removing $CxP_path"
 		Remove-Item $CxP_path
 	} else {
-		Write-Host "File $CxP_path doesn't exist to remove"
+		Write-Host "  File $CxP_path doesn't exist to remove"
 	}
-	
-	Write-Host "You may be required to manually check and remove previous backups named: *.cxpt.bak"
 }
 
 function stage_insert {
@@ -92,84 +143,129 @@ function stage_insert {
 	#Write-Host "Stage insert $srcfile $stagefile $backup" 
 	
 	if ( (Test-Path -Path $backup) -ne $True ) {
-			Write-Host "Backup file $backup does not exist, skipping"
-			return;
+		Write-Host "  Backup file $backup does not exist, skipping"
+		return;
 	}
 	if ( Test-Path -Path $stagefile ) { Remove-Item $stagefile }	
 	
-	Write-Host "Creating $stagefile"
+	Write-Host "  Creating staging file: $stagefile"
 	$ret = New-Item -Path $stagefile -Force
 	$linecount = 0;
 	foreach($line in [System.IO.File]::ReadLines($backup))
 	{
 		$linecount++;
 		if ( $line -match "/CxWebClient/CxP-Tweaks.js" ) {
-			Write-Host "File already contains reference to CxP-Tweaks.js, skipping"
+			Write-Host "    This file already contains reference to CxP-Tweaks.js, skipping"
 			Remove-Item $stagefile
 			return
 		}
 		
 		if ( $line -match $condition ) {
 			Add-Content -Path $stagefile -Value $inserted_line
-			Write-Host " - Inserting line $linecount`: $inserted_line"
+			Write-Host "   Inserting line $linecount`: $inserted_line"		                
 		}
-		Add-Content -Path $stagefile -Value $line
+        Add-Content -Path $stagefile -Value $line
 	}
 	
 	# changes are done, replace the file.
 	if ( Test-Path -Path $stagefile ) {
 		Remove-Item $srcfile
-		Move-Item -Path $stagefile -Destination $srcfile
+		Copy-Item -Path $stagefile -Destination $srcfile
 	}
 }
 
 function stage_install {
-	Write-Host "Staging installation"
+	Write-Host "`nStaging installation"
 	
-	# first do the access control index.html
 	$srcfile = "$installationPath\Checkmarx Access Control\wwwroot\index.html"
-	stage_insert -srcfile $srcfile -stagefile "$srcfile.stage" -condition [regex]".*</body>" -inserted_line "    <script type=`"text/javascript`" src=`"/CxWebClient/CxP-Tweaks.js`" defer></script>"
+	stage_insert -srcfile $srcfile -stagefile "$srcfile.cxpt.stage" -condition [regex]".*</body>" -inserted_line "    <script type=`"text/javascript`" src=`"/CxWebClient/CxP-Tweaks.js`" defer></script>"
 	
 	$srcfile = "$installationPath\CheckmarxWebPortal\Web\UIComponents\UserControls\PortalMenu\PortalMenu.ascx"
-	stage_insert -srcfile $srcfile -stagefile "$srcfile.stage" -condition "</header>" -inserted_line "    <script type=`"text/javascript`" src=`"/CxWebClient/CxP-Tweaks.js`" defer></script>"
+	stage_insert -srcfile $srcfile -stagefile "$srcfile.cxpt.stage" -condition "</header>" -inserted_line "    <script type=`"text/javascript`" src=`"/CxWebClient/CxP-Tweaks.js`" defer></script>"
+
+    $srcfile = "$installationPath\CheckmarxWebPortal\Web\ScanQueryDescription.aspx"
+	stage_insert -srcfile $srcfile -stagefile "$srcfile.cxpt.stage" -condition "</body>" -inserted_line "    <script type=`"text/javascript`" src=`"/CxWebClient/CxP-Tweaks.js`" defer></script>"
+
+    $srcfile = "$installationPath\CheckmarxWebPortal\Web\ViewerGrid.aspx"
+	stage_insert -srcfile $srcfile -stagefile "$srcfile.cxpt.stage" -condition "</html>" -inserted_line "    <script type=`"text/javascript`" src=`"/CxWebClient/CxP-Tweaks.js`" defer></script>"
+
+
 }
 
 if ( $installationPath -eq '' ) {
-	$loop = 1;
-	while ( $loop ) {	
-		$installationPath = 'C:\Program Files\Checkmarx'
-		$ret = Read-Host "Enter the path to your Checkmarx installation [$installationPath]"
-		if ( $ret -ne "" ) {
-			$installationPath = $ret;
-		}
-		if ( Test-Path -Path $installationPath ) {
-			Write-Host " - Verified $installationPath exists"
-			$installationPath = $installationPath
-			$loop = 0;
-		} else {
-			Write-Host " - Path $installationPath does not exist. Please enter the path to your Checkmarx installation on this host."
-		}
+    $installationPath = 'C:\Program Files\Checkmarx'
+}
+
+$loop = 1;
+while ( $loop ) {	
+	$ret = Read-Host "Enter the path to your Checkmarx installation [$installationPath]"
+	if ( $ret -eq "" ) {
+		$ret = $installationPath
+	}
+	if ( Test-Path -Path $ret ) {
+		Write-Host "  Verified $ret exists"
+
+		$loop = 0;
+
+        foreach ( $file in $files ) {
+		    $current = "$ret\$file"
+            if ( -Not (Test-Path -Path $current) ) {
+                Write-Host "   Error: An expected file $current does not exist. If this is the correct installation folder, this version of Checkmarx may not be supported by this version of CxP-Tweaks"
+                $loop = 1;
+            }
+        }
+
+        if ( $loop -eq 0 ) {
+            $installationPath = $ret
+        }
+	} else {
+		Write-Host " - Path $ret does not exist. Please enter the path to your Checkmarx installation on this host."
 	}
 }
 
-if ( $reset ) {
-	$confirmation = Read-Host "Resetting back to original backups, continue? [y/n]"
+
+
+
+if ( $restore ) {
+	$confirmation = Read-Host "Restoring files from backups, continue? [y/N]"
 	if ( $confirmation -ne 'y' -and $confirmation -ne 'Y' ) {
 		Write-Host "Canceled."
 		exit;
 	}
-	do_reset
+	$ret = do_restore
 	exit
-}
-
-if ( $purge ) {
-	$confirmation = Read-Host "Resetting back to original backups and removing backups and CxP-Tweaks.js, continue? [y/n]"
+} elseif ( $purge ) {
+	$confirmation = Read-Host "Resetting back to original backups and removing backups and CxP-Tweaks.js, continue? [y/N]"
 	if ( $confirmation -ne 'y' -and $confirmation -ne 'Y' ) {
 		Write-Host "Canceled."
 		exit;
 	}
 	do_purge
 	exit
+} else {
+    # disclaimer
+    Write-Host "`nThis script will modify the following files:"
+    $backup_count = 0
+    foreach ( $file in $files ) {
+    	$current = "$installationPath\$file"
+		$backup = "$current.cxpt.bak"
+        $stage = "$current.cxpt.stage"
+
+        Write-Host "  $current"
+        if ( Test-Path -Path $backup ) {
+            $backup_count++
+        }
+    }
+
+    if ( $backup_count -ne $files.Count ) {
+        Write-Host "`nPlease ensure that you have manually created a backup of these files before proceeding."
+    }
+
+    $confirmation = Read-Host "`nBegin installation? [y/N]"
+    if ( $confirmation -ne 'y' -and $confirmation -ne 'Y' ) {
+	    Write-Host "Canceled."
+	    exit;
+    }
 }
 
 
