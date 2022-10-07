@@ -26,6 +26,7 @@ function find_in_file {
 
 function do_backup {
     Write-Host "`nBacking up existing files"
+    $backup_count = 0
 
 	foreach ( $file in $files ) {
 		$current = "$installationPath\$file"
@@ -34,25 +35,42 @@ function do_backup {
 
         if ( $force -ne $True ) {
             if (Test-Path -Path $stage) {
-                if ((Get-FileHash -path $current).Hath -eq (Get-FileHash -path $stage).Hash) {
-                    Write-Host "  Note: The current file ($current) has already been modified and matches the staging file ($stage). Skipping."
+                if ((Get-FileHash -path $current).Hash -eq (Get-FileHash -path $stage).Hash) {
+                    if ( Test-Path -Path $backup ) {
+                        Write-Host "  Note: The current file ($current) has already been modified and matches the staging file ($stage), and a backup already exists ($backup). Skipping."
+                        $backup_count ++
+                    } else {
+                        Write-Host "`n  Error: The current file ($current) has already been modified and matches the staging file ($stage), but the backup file ($backup) is missing."
+                    }
                     continue
                 }
                 if ( find_in_file -file $current -string "CxWebClient/CxP-Tweaks.js" ) {
-                    Write-Host "  Note: The current file ($current) already includes CxP-Tweaks.js, but does not match the staging file ($stage) - it may have been manually modified. Skipping."
+                    if ( Test-Path -Path $backup ) {
+                        Write-Host "  Note: The current file ($current) already includes CxP-Tweaks.js, but does not match the staging file ($stage) - it may have been manually modified. A backup file ($backup) already exists. Skipping."
+                        $backup_count++
+                    } else {
+                        Write-Host "  Note: The current file ($current) already includes CxP-Tweaks.js, but does not match the staging file ($stage) - it may have been manually modified. A backup file ($backup) does not exist. Skipping."
+                    }
                     continue
                 }
             }
 
-		    if ( (Test-Path -Path $backup) ) {
-			    Write-Host "  Backup $backup already exists, not forced using parameter -force `$true. Skipping."
+		    if ( Test-Path -Path $backup ) {
+                if ((Get-FileHash -path $current).Hash -eq (Get-FileHash -path $backup).Hash) {
+			        Write-Host "  Backup $backup already exists and is identical to $current. Skipping."
+                    $backup_count ++
+                } else {
+                    Write-Host "  Backup $backup already exists but does not match $current. To force a new backup use the parameter -force `$true. Skipping."
+                }
                 continue
 		    }
         }
 
 		Write-Host "  Creating backup $backup"			
 		Copy-Item $current -Dest $backup -Force
+        $backup_count++
 	}
+    return $backup_count
 }
 
 function do_restore {
@@ -81,7 +99,7 @@ function do_restore {
             }
 
             if ( -Not ((Get-FileHash -Path $current).Hash -eq (Get-FileHash -Path $stage).Hash) ) {
-                Write-Host "  Error: The current file ($current) does not match the staging file ($stage). `n    This may be due to running a hotfix or update, in which case the backup is from an older version. Skipping the restore.`n    Please review the contents of these files. If you wish to force the restore use the parameter -force `$true."
+                Write-Host "`n  Error: The current file ($current) does not match the staging file ($stage). `n    This may be due to running a hotfix or update, in which case the backup is from an older version. Skipping the restore.`n    Please review the contents of these files. If you wish to force the restore use the parameter -force `$true."
                 continue
             }
         }
@@ -210,7 +228,7 @@ while ( $loop ) {
         foreach ( $file in $files ) {
 		    $current = "$ret\$file"
             if ( -Not (Test-Path -Path $current) ) {
-                Write-Host "   Error: An expected file $current does not exist. If this is the correct installation folder, this version of Checkmarx may not be supported by this version of CxP-Tweaks"
+                Write-Host "`n   Error: An expected file $current does not exist. If this is the correct installation folder, this version of Checkmarx may not be supported by this version of CxP-Tweaks"
                 $loop = 1;
             }
         }
@@ -222,6 +240,38 @@ while ( $loop ) {
 		Write-Host " - Path $ret does not exist. Please enter the path to your Checkmarx installation on this host."
 	}
 }
+
+Write-Host "`n`nCurrent installation details:"
+$cxpt_count = 0
+foreach ( $file in $files ) {
+    $current = "$installationPath\$file"
+	$backup = "$current.cxpt.bak"
+    $stage = "$current.cxpt.stage"
+
+    $backup_status = "No backup"
+    $stage_status = "No staged version"
+    if ( (Test-Path -Path $backup) ) {
+        $backup_status = "Has backup"
+    }
+    if ( (Test-Path -Path $stage) ) {
+        $stage_status = "Has staged version"
+    }
+
+    if ( (Test-Path -Path $backup) -and (Get-FileHash -path $current).Hash -eq (Get-FileHash -path $backup).Hash ) {
+        Write-Host "  $current`n    Original, $backup_status, $stage_status"
+    } elseif ( (Test-Path -Path $stage) -and (Get-FileHash -path $current).Hash -eq (Get-FileHash -path $stage).Hash ) {
+        Write-Host "  $current`n    CxP-Tweaks installed, $backup_status, $stage_status"
+        $cxpt_count++
+    } elseif ( find_in_file -file $current -string "CxWebClient/CxP-Tweaks.js" ) {
+        Write-Host "  $current`n    Modified with CxP-Tweaks installed, $backup_status, $stage_status"
+        $cxpt_count++
+    } else {
+        Write-Host "  $current`n    Most likely original, $backup_status, $stage_status"
+    }
+    
+    Write-Host ""
+}
+
 
 
 
@@ -242,6 +292,11 @@ if ( $restore ) {
 	}
 	do_purge
 	exit
+} elseif ( $cxpt_count -eq $files.Count ) {
+    Write-Host "`nCxP-Tweaks.js is already present in all $cxpt_count files. Copying CxP-Tweaks.js file only."
+    $CxP_dest = "$installationPath\CheckmarxWebPortal\Web\"
+    Copy-Item CxP-Tweaks.js -Destination $CxP_dest -Force
+    exit;
 } else {
     # disclaimer
     Write-Host "`nThis script will modify the following files:"
@@ -275,6 +330,10 @@ $CxP_dest = "$installationPath\CheckmarxWebPortal\Web\"
 Write-Host "Copying CxP-Tweaks.js to $CxP_dest"
 Copy-Item CxP-Tweaks.js -Destination $CxP_dest -Force
 
-do_backup
+$res = do_backup
+if ( $force -ne $True -and $res -ne $files.Count ) {
+    Write-Host "`nError: Unable to backup all files, cancelling."
+    exit
+}
 
 stage_install

@@ -9,7 +9,7 @@
 	CxPT.banners = new Object();
 	CxPT.topnav = new Object();
 	CxPT.schedule = new Object();
-	CxPT.querydescription = new Object();
+	CxPT.codebashing = new Object();
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //	Configuration options
@@ -43,8 +43,9 @@
 	CxPT.schedule.endHour = 24; // midnight
 	CxPT.schedule.increment = 15; // 15 minute increment
 	
-// ScanQueryDescription page options	
-	CxPT.querydescription.codebashing_enabled = 0;
+// Codebashing link options	(se also CxPT.topnav.codebashing_enabled above)
+	CxPT.codebashing.querydescription_enabled = 0;
+	CxPT.codebashing.resultsviewer_enabled = 0;
 	
 // Page-specific user-side tweaks
 	CxPT.menu.page_items = [
@@ -225,7 +226,7 @@
 		var links_div = document.getElementsByClassName('login-bottom-links_stac');
 		var sso_div = document.getElementsByClassName('sso-login-seperator');
 		
-		if ( sso_div.length == 0 || links_div.length == 0 ) {
+		if ( sso_div.length == 0 && links_div.length == 0 ) {
 			CxPT.loginpage.polling_counter ++;
 			if ( CxPT.loginpage.polling_counter < 20 ) {
 				setTimeout(CxPT.loginpage.polling_function, 100);
@@ -327,7 +328,7 @@
 		if ( !div ) return;
 			
 		var UL = document.createElement( "UL" );
-		//UL.style.cssText = "position:absolute; background-color: #baabaa; padding: 2px; border: 1px solid black; display: block; min-width:100px; text-align:left; list-style-type:none; margin:2px;"
+		UL.style.cssText = "position:absolute; background-color: #ffffff; padding: 2px; border: 1px solid black; display: block; min-width:100px; text-align:left; list-style-type:none; margin:2px;"
 		UL.style.className = "dropdown-menu";
 		div.appendChild( UL );
 		CxPT.menu.obj = UL;
@@ -344,7 +345,7 @@
 	CxPT.menu.addItem = function ( entry ) {
 		var LI = document.createElement( "LI" );
 //		LI.style.cssText = "margin: 0px;";
-		LI.style.backgroundColor = "#aeaeae";
+		LI.style.backgroundColor = "#ffffff";
 		LI.innerHTML = entry;
 		CxPT.menu.obj.appendChild( LI );
 	};
@@ -373,11 +374,16 @@
 		}		
 	};
 		
-// ScanQueryDescription page removal of Codebashing
-	CxPT.querydescription.Init = function () {
+// Codebashing
+	CxPT.codebashing.querydescription_Init = function () {
 		var codebashing_tab = document.getElementById('divAppSecCoachTabs');
 		if ( !codebashing_tab ) return;
 		codebashing_tab.style.display = "none";
+	};
+	CxPT.codebashing.resultsviewer_Init = function () {
+		var codebashing_button = document.getElementsByTagName( "app-sec-coach-tab-button-positioner" )
+		if ( codebashing_button.length > 0 ) codebashing_button = codebashing_button[0];
+		codebashing_button.style.display = "none";
 	};
 
 
@@ -392,11 +398,12 @@ CxPT.Init = function () {
 		topnav_present = 0;
 	} else if ( window.location.pathname.includes( "/ViewerGrid.aspx" ) ) {
 		if ( CxPT.banners.resultsviewer_banners.length > 0 ) CxPT.banners.resultsviewer_Init();
+		if ( CxPT.codebashing.resultsviewer_enabled == 0 ) CxPT.codebashing.resultsviewer_Init();
 		topnav_present = 0;
 	} else if ( window.location.pathname.includes( "/Projects.aspx" ) ) {
 		if ( CxPT.schedule.enabled == 1 ) CxPT.schedule.Init();
 	} else if ( window.location.pathname.includes( "/ScanQueryDescription.aspx" ) ) {
-		if ( CxPT.querydescription.codebashing_enabled == 0 ) CxPT.querydescription.Init();
+		if ( CxPT.codebashing.querydescription_enabled == 0 ) CxPT.codebashing.querydescription_Init();
 		topnav_present = 0;
 	}
 
