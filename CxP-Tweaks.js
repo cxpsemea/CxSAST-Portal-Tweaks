@@ -25,10 +25,10 @@
 	CxPT.banners.topnav_enabled = 1;
 	CxPT.banners.resultsviewer_enabled = 1;
 	CxPT.banners.height = 30; // height of the banner in pixels
-	CxPT.banners.topnav_fontsize = "12px";
-	CxPT.banners.resultsviewer_fontsize = CxPT.banners.topnav_fontsize;  // same as topnav size by default
+	CxPT.banners.topnav_fontsize = "12pt";
+	CxPT.banners.resultsviewer_fontsize = "11pt"; //CxPT.banners.topnav_fontsize;  // same as topnav size by default
 	CxPT.banners.topnav_banners = [
-		"This is an example banner. <a href='https://github.com/michaelkubiaczyk/CxP-Tweaks' style='color: #5f5f5f; text-decoration: underline #333 solid !important; font-size: 1.1em;' target='_blank'>Click here</a>" // example of usage, uncomment and enable to show
+		"This is an example banner. <a href='https://github.com/michaelkubiaczyk/CxP-Tweaks' style='color: #5f5f5f; text-decoration: underline #333 solid !important; font-size:1em;' target='_blank'>Click here</a>" // example of usage, uncomment and enable to show
 	];
 	CxPT.banners.resultsviewer_banners = CxPT.banners.topnav_banners; // Show the same banners in all locations by default.
 
@@ -74,8 +74,6 @@
 
 	CxPT.banners.resultsviewer_Init = function () { // banner on the results viewer page
 		if ( CxPT.banners.resultsviewer_enabled == 1 ) {
-			//ID="dottomPane"
-			//ID="mainSplitBar"
 			oldcalculateGridHight = calculateGridHight;
 			calculateGridHight = function(data) { return oldcalculateGridHight(data) - CxPT.banners.gridgap; };
 			
@@ -85,11 +83,7 @@
 			span.style.fontSize = CxPT.banners.resultsviewer_fontsize;
 			div.parentNode.insertBefore( span, div );
 			CxPT.banners.setBannerText( CxPT.banners.resultsviewer_banners );
-			
-			/*
-			var tree = document.getElementById( "RAD_SPLITTER_PANE_CONTENT_treePane" );
-			alert( tree.style.cssText ); // the height changes due to the telerik framework, unclear how to override.
-			*/
+
 		}
 	};
 	CxPT.banners.topnav_Init = function () { // top nav
@@ -126,8 +120,8 @@
 					color: #5f5f5f;
 					margin: auto;
 					padding: .3rem 2.9rem;
-					line-height: ` + CxPT.banners.height + `;
-					height: ` + CxPT.banners.height + `;
+					line-height: ` + CxPT.banners.height + `px;
+					height: ` + CxPT.banners.height + `px;
 					clear: both;
 					text-align: center;
 					font-weight: normal;
