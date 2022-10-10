@@ -24,7 +24,9 @@
 // Banner options
 	CxPT.banners.topnav_enabled = 1;
 	CxPT.banners.resultsviewer_enabled = 1;
-	CxPT.banners.height = 30;
+	CxPT.banners.height = 30; // height of the banner in pixels
+	CxPT.banners.topnav_fontsize = "12px";
+	CxPT.banners.resultsviewer_fontsize = CxPT.banners.topnav_fontsize;  // same as topnav size by default
 	CxPT.banners.topnav_banners = [
 		"This is an example banner. <a href='https://github.com/michaelkubiaczyk/CxP-Tweaks' style='color: #5f5f5f; text-decoration: underline #333 solid !important; font-size: 1.1em;' target='_blank'>Click here</a>" // example of usage, uncomment and enable to show
 	];
@@ -80,6 +82,7 @@
 			var div = document.getElementById( "descriptionDiv" );
 			if ( !div ) return;
 			var span = CxPT.banners.createBanner();
+			span.style.fontSize = CxPT.banners.resultsviewer_fontsize;
 			div.parentNode.insertBefore( span, div );
 			CxPT.banners.setBannerText( CxPT.banners.resultsviewer_banners );
 			
@@ -94,6 +97,7 @@
 			var div = document.getElementsByClassName ("breadcrumb");
 			if ( div != 0 ) {
 				var span = CxPT.banners.createBanner();
+				span.style.fontSize = CxPT.banners.topnav_fontsize;
 				div[0].parentNode.appendChild( span );		
 				CxPT.banners.setBannerText( CxPT.banners.topnav_banners );	
 			}
@@ -128,8 +132,7 @@
 					text-align: center;
 					font-weight: normal;
 					text-align: center;
-					display:block;
-					font-size: 1.1em !important;`;
+					display:block;`;
 					
 		span.innerHTML = `<span id='onboarding_banner'></span></div>`;
 		return span;
