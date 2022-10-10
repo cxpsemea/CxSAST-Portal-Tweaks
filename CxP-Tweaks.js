@@ -26,7 +26,7 @@
 	CxPT.banners.resultsviewer_enabled = 1;
 	CxPT.banners.height = 30; // height of the banner in pixels
 	CxPT.banners.topnav_fontsize = "12pt";
-	CxPT.banners.resultsviewer_fontsize = "11pt"; //CxPT.banners.topnav_fontsize;  // same as topnav size by default
+	CxPT.banners.resultsviewer_fontsize = "11pt";
 	CxPT.banners.topnav_banners = [
 		"This is an example banner. <a href='https://github.com/michaelkubiaczyk/CxP-Tweaks' style='color: #5f5f5f; text-decoration: underline #333 solid !important; font-size:1em;' target='_blank'>Click here</a>" // example of usage, uncomment and enable to show
 	];
