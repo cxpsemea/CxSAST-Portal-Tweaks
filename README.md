@@ -63,13 +63,13 @@ Various features in CxP-Tweaks.js require the script to be loaded within the Che
 Add the above script tag to the following files:
 1. Checkmarx\Checkmarx Access Control\wwwroot\index.html
   - Required to enable the login page tweaks (removing Forgot Password, adding custom cuttons)
-  - insert the script before the </body> tag at the end of the file
+  - insert the script before the closing body tag at the end of the file
 2. Checkmarx\CheckmarxWebPortal\Web\UIComponents\UserControls\PortalMenu\PortalMenu.ascx
   - Required for most of the remaining tweaks
-  - insert the script before the </header> tag at the end of the file
+  - insert the script before the closing header tag at the end of the file
 3. Checkmarx\CheckmarxWebPortal\ScanQueryDescription.aspx
   - Required to hide the Codebashing box on the query description popup (accessed by clicking the '?' in the bottom-left vulnerability tree on the scan results viewer page)
-  - insert the script before the </body> at the end of the file
+  - insert the script before the closing body tag at the end of the file
 4. Checkmarx\CheckmarxWebPortal\ViewerGrid.aspx
   - Required to show banners and to hide the codebashing button on the Results Viewer page
-  - insert the script before the </html> at the end of the file
+  - insert the script before the closing html tag at the end of the file
