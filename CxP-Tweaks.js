@@ -119,7 +119,6 @@
 					border-radius: 0;
 					color: #5f5f5f;
 					margin: auto;
-					padding: .3rem 2.9rem;
 					line-height: ` + CxPT.banners.height + `px;
 					height: ` + CxPT.banners.height + `px;
 					clear: both;
