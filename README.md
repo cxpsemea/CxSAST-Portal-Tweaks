@@ -25,8 +25,8 @@ Clone this git repo somewhere.
 
 ## Configuration
 
-Edit the "CxP-Tweaks.js" file and customize the configuration options as indicated at the top of the file.
-Ensure that you have updated this file prior to deploying it.
+Copy the "CxP-Tweaks.js" file into "CxP-Tweaks - customized.js" and customize the configuration options as indicated at the top of the file. It is recommended to use a copy in this manner to ensure that updates to CxP-Tweaks.js do not overwrite your customizations.
+Ensure that you have reviewed this file prior to deploying it.
 
 ## Automated Installation
 

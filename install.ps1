@@ -272,8 +272,19 @@ foreach ( $file in $files ) {
     Write-Host ""
 }
 
+$cxPTweaksJS = "CxP-Tweaks.js"
 
-
+if ( Test-Path -Path "CxP-Tweaks - customized.js" ) {
+	$confirmation = Read-Host "A customized version of CxP-Tweaks.js was found in local file 'CxP-Tweaks - customized.js' - deploy this file instead? [Y/n]"
+	if ( $confirmation -ne 'n' -and $confirmation -ne 'N' ) {
+		Write-Host " - Using customized file 'CxP-Tweaks - customized.js'`n Note: You should compare CxP-Tweaks.js with this customized file to ensure any updates to the original are included."
+		$cxPTweaksJS = "CxP-Tweaks - customized.js"
+	} else {
+		Write-Host " - Using original CxP-Tweaks.js"
+	}
+} else {
+	Write-Host " - Using local CxP-Tweaks.js file. You can copy 'CxP-Tweaks.js' to 'CxP-Tweaks - customized.js' with your customizations and this script will deploy that file instead. This can help to keep your customizations when a new version of CxP-Tweaks.js is published."
+}
 
 
 if ( $restore ) {
@@ -293,9 +304,9 @@ if ( $restore ) {
 	do_purge
 	exit
 } elseif ( $cxpt_count -eq $files.Count ) {
-    Write-Host "`nCxP-Tweaks.js is already present in all $cxpt_count files. Copying CxP-Tweaks.js file only."
-    $CxP_dest = "$installationPath\CheckmarxWebPortal\Web\"
-    Copy-Item CxP-Tweaks.js -Destination $CxP_dest -Force
+    Write-Host "`nCxP-Tweaks.js is already present in all $cxpt_count files. Copying $cxPTweaksJS file only."
+    $CxP_dest = "$installationPath\CheckmarxWebPortal\Web\CxP-Tweaks.js"
+    Copy-Item $cxPTweaksJS -Destination $CxP_dest -Force
     exit;
 } else {
     # disclaimer
@@ -326,9 +337,9 @@ if ( $restore ) {
 
 
 # copy the js file
-$CxP_dest = "$installationPath\CheckmarxWebPortal\Web\"
-Write-Host "Copying CxP-Tweaks.js to $CxP_dest"
-Copy-Item CxP-Tweaks.js -Destination $CxP_dest -Force
+$CxP_dest = "$installationPath\CheckmarxWebPortal\Web\CxPTweaks.js"
+Write-Host "Copying $cxPTweaksJS to $CxP_dest"
+Copy-Item $cxPTweaksJS -Destination $CxP_dest -Force
 
 $res = do_backup
 if ( $force -ne $True -and $res -ne $files.Count ) {
