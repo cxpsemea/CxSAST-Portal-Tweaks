@@ -337,7 +337,7 @@ if ( $restore ) {
 
 
 # copy the js file
-$CxP_dest = "$installationPath\CheckmarxWebPortal\Web\CxPTweaks.js"
+$CxP_dest = "$installationPath\CheckmarxWebPortal\Web\CxP-Tweaks.js"
 Write-Host "Copying $cxPTweaksJS to $CxP_dest"
 Copy-Item $cxPTweaksJS -Destination $CxP_dest -Force
 
